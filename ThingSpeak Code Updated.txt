@@ -1,0 +1,140 @@
+ThingSpeak 
+
+MATLAB Analysis
+
+//////////////////////////////////////////////////////////
+Temp email alerts
+//////////////////////////////////////////////////////////
+% Store the channel ID 
+channelID = 1437170;
+
+% Provide the ThingSpeak alerts API key.  All alerts API keys start with TAK.
+alertApiKey = 'TAK4P4J20TCAYMKG8EM74';
+
+% Set the address for the HTTTP call
+alertUrl="https://api.thingspeak.com/alerts/send";
+
+% webwrite uses weboptions to add required headers. Alerts needs a ThingSpeak-Alerts-API-Key header.
+options = weboptions("HeaderFields", ["ThingSpeak-Alerts-API-Key", alertApiKey ]);
+
+% Set the email subject.
+alertSubject = sprintf("Abnormality alert!");
+
+% Read the recent data.
+tempData = thingSpeakRead(channelID,'NumDays',1,'Fields',2);
+
+    % Set the outgoing message
+    if (tempData < 28)
+        alertBody = 'Temperature in the water is below 28 degree celsius. The minimum treshold is 28 degree celsius '; %minimum is 28
+    
+    elseif (tempData > 32)
+        alertBody = 'Temperature in the water is above 32 degree celsius. The maximum treshold is 32 degree celsius '; %maximum is 32
+ 
+   end
+ 
+ % Catch errors so the MATLAB code does not disable a TimeControl if it fails
+try
+    webwrite(alertUrl , "body", alertBody, "subject", alertSubject, options);
+catch someException
+    fprintf("Failed to send alert: %s\n", someException.message);
+end
+
+
+//////////////////////////////////////////////////////////
+pH Email alert
+//////////////////////////////////////////////////////////
+% Store the channel ID 
+channelID = 1437170;
+
+% Provide the ThingSpeak alerts API key.  All alerts API keys start with TAK.
+alertApiKey = 'TAK4P4J20TCAYMKG8EM74';
+
+% Set the address for the HTTTP call
+alertUrl="https://api.thingspeak.com/alerts/send";
+
+% webwrite uses weboptions to add required headers. Alerts needs a ThingSpeak-Alerts-API-Key header.
+options = weboptions("HeaderFields", ["ThingSpeak-Alerts-API-Key", alertApiKey ]);
+
+% Set the email subject.
+alertSubject = sprintf("Abnormality alert!");
+
+% Read the recent data.
+pHData = thingSpeakRead(channelID,'NumDays',1,'Fields',1);
+
+    % Set the outgoing message
+    if (pHData < 6.5)
+        alertBody = 'pH value is less than 6.5. The minimum Treshold is 6.5 '; % mininum is 6.5
+   
+    elseif (pHData > 9)
+        alertBody = 'pH value is more than 9. The maximum Treshold is 9'; % maximum is 9
+ 
+   end
+ 
+ % Catch errors so the MATLAB code does not disable a TimeControl if it fails
+try
+    webwrite(alertUrl , "body", alertBody, "subject", alertSubject, options);
+catch someException
+    fprintf("Failed to send alert: %s\n", someException.message);
+end
+
+
+
+//////////////////////////////////////////////////////////
+MATLAB Visualizations
+//////////////////////////////////////////////////////////
+pH level multi-color line
+//////////////////////////////////////////////////////////
+readChannelID = 1437170;
+fieldID1 = 1;
+
+% Channel Read API Key  
+readAPIKey = 'TXMX69Q0B2NCOOGX';
+
+%% Read Data %%
+[data, time] = thingSpeakRead(readChannelID, 'Field', fieldID1, 'NumPoints', 30, 'ReadKey', readAPIKey);
+dataGtNorm = NaN(1, length(data)); % greater
+dataLsNorm = NaN(1, length(data)); % lesser
+dataEqNorm = NaN(1, length(data)); % equal
+dataEqNorm(data>6) = data(data>6); 
+dataEqNorm(data<7) = data(data<7);
+dataLsNorm(data<6) = data(data<6);
+dataGtNorm(data>7) = data(data>7);
+
+
+%% Visualize Data %%
+plot(time,dataEqNorm,'g'); % Normal is green
+hold on;
+plot(time,dataLsNorm,'b'); % Lesser is blue
+hold on;
+plot(time,dataGtNorm,'r'); % Greater is red
+
+//////////////////////////////////////////////////////////
+Temperature multi-color line
+//////////////////////////////////////////////////////////
+
+readChannelID = 1437170;
+fieldID1 = 2;
+
+% Channel Read API Key 
+readAPIKey = 'TXMX69Q0B2NCOOGX';
+
+%% Read Data %%
+[data, time] = thingSpeakRead(readChannelID, 'Field', fieldID1, 'NumPoints', 30, 'ReadKey', readAPIKey);
+dataGtNorm = NaN(1, length(data)); % greater
+dataLsNorm = NaN(1, length(data)); % lesser
+dataEqNorm = NaN(1, length(data)); % equal
+dataEqNorm(data>28) = data(data>28); 
+dataEqNorm(data<32) = data(data<32);
+dataLsNorm(data<28) = data(data<28);
+dataGtNorm(data>32) = data(data>32);
+
+
+%% Visualize Data %%
+plot(time,dataEqNorm,'g'); % Normal is green
+hold on;
+plot(time,dataLsNorm,'b'); % Cold is blue
+hold on;
+plot(time,dataGtNorm,'r'); % Hot is red
+
+//////////////////////////////////////////////////////////
+
